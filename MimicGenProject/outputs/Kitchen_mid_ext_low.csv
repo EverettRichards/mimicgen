@@ -1,0 +1,5 @@
+run,noise,success_rate,successes,failures,attempted,duration
+kitchen_D1_noisy_0,0.275,13.0,13,87,100,2124.0
+kitchen_D1_noisy_1,0.3,10.0,10,90,100,1908.0
+kitchen_D1_noisy_2,0.325,5.0,5,95,100,2124.0
+kitchen_D1_noisy_3,0.35,7.0,7,93,100,1980.0

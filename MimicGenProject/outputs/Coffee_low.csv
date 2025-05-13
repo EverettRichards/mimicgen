@@ -1,0 +1,6 @@
+run,noise,success_rate,successes,failures,attempted,duration
+coffee_D1_noisy_0,0,65,65,35,100,1044
+coffee_D1_noisy_1,0.01,67,67,33,100,1116
+coffee_D1_noisy_2,0.02,62,62,38,100,1188
+coffee_D1_noisy_3,0.03,65,65,35,100,1080
+coffee_D1_noisy_4,0.05,62,62,38,100,1116

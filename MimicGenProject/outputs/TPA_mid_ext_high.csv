@@ -1,0 +1,5 @@
+run,noise,success_rate,successes,failures,attempted,duration
+three_piece_assembly_D1_noisy_0,0.4,0.0,0,100,100,1727.9999999999998
+three_piece_assembly_D1_noisy_1,0.425,0.0,0,100,100,1512.0
+three_piece_assembly_D1_noisy_2,0.45,1.0,1,99,100,1368.0
+three_piece_assembly_D1_noisy_3,0.475,1.0,1,99,100,1512.0

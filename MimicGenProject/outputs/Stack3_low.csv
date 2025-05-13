@@ -1,0 +1,6 @@
+run,noise,success_rate,successes,failures,attempted,duration
+stack_three_D1_noisy_0,0.0,68.0,68,32,100,792.0
+stack_three_D1_noisy_1,0.01,65.0,65,35,100,828.0
+stack_three_D1_noisy_2,0.02,66.0,66,34,100,936.0000000000001
+stack_three_D1_noisy_3,0.03,71.0,71,29,100,863.9999999999999
+stack_three_D1_noisy_4,0.05,57.0,57,43,100,936.0000000000001

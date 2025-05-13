@@ -1,0 +1,7 @@
+run,noise,success_rate,successes,failures,attempted,duration
+square_D1_noisy_0,0.005,43.0,43,57,100,756.0
+square_D1_noisy_1,0.015,41.0,41,59,100,684.0
+square_D1_noisy_2,0.025,42.0,42,58,100,720.0
+square_D1_noisy_3,0.035,42.0,42,58,100,612.0000000000001
+square_D1_noisy_4,0.04,45.0,45,55,100,720.0
+square_D1_noisy_5,0.045,42.0,42,58,100,647.9999999999999

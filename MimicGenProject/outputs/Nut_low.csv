@@ -1,0 +1,6 @@
+run,noise,success_rate,successes,failures,attempted,duration
+nut_assembly_D0_noisy_0,0.0,53.0,53,47,100,1440.0
+nut_assembly_D0_noisy_1,0.01,55.0,55,45,100,1368.0
+nut_assembly_D0_noisy_2,0.02,51.0,51,49,100,1475.9999999999998
+nut_assembly_D0_noisy_3,0.03,52.0,52,48,100,1440.0
+nut_assembly_D0_noisy_4,0.05,56.0,56,44,100,1404.0000000000002

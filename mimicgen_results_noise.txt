@@ -1,0 +1,41 @@
+@ 10 trials:
+noise_scale, success_rate
+0.00, 0.30
+0.01, 0.30
+0.02, 0.20
+0.03, 0.30
+0.05, 0.30
+0.10, 0.20
+0.15, 0.30
+0.20, 0.30
+0.25, 0.20
+0.50, 0.10
+0.75, 0.00
+1.00, 0.00
+
+@ 100 trials:
+noise_scale, success_rate
+0.00, 0.42
+0.01, 0.44
+0.02, 0.44
+0.03, 0.42
+0.05, 0.41
+0.10, 0.41
+0.15, 0.35
+0.20, 0.31
+0.25, 0.20
+0.50, 0.01
+0.75, 0.02
+1.00, 0.00
+
+Environments: MG_* Coffee, Threading, ThreePieceAssembly, Square, Stack, StackThree, HammerCleanup, MugCleanup, NutAssembly, PickPlace, Kitchen, CoffeePreparation
+*NutAssembly is D=0, else D=1
+
+python mimicgen/scripts/prepare_src_dataset.py --dataset datasets/source/square_noisy.hdf5 --env_interface MG_Square --env_interface_type robosuite
+
+python mimicgen/scripts/generate_dataset.py --config /tmp/core_configs/demo_src_square_task_D1.json --auto-remove-exp
+
+python ../mycode/noise.py
+
+
+python ../mycode/noise.py && python mimicgen/scripts/prepare_src_dataset.py --dataset datasets/source/square_noisy.hdf5 --env_interface MG_Square --env_interface_type robosuite && python mimicgen/scripts/generate_dataset.py --config /tmp/core_configs/demo_src_square_task_D1.json --auto-remove-exp
