@@ -1,2 +1,4 @@
-task,difficulty,noise,num_samples,success,fail
-,,0.0,,5.0,5.0
+noise,success,fail
+0.0,5,5
+0.01,5,5
+0.02,5,5

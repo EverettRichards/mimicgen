@@ -12,12 +12,16 @@ from multiprocessing import Process
 
 ######################################################################
 
-num_samples = 5
+num_samples = 10
 max_concurrent_samples = 5
+
+debug_mode = False
+show_progress = False
 
 instructions = [
     [("kitchen","Kitchen","1"),[0.00,0.01,0.02]],
-    [("coffee","Coffee","1"),[0.05,0.10,0.15]],
+    [("coffee","Coffee","1"),[0.05,0.20,0.09]],
+    [("three_piece_assembly","Three Piece Assembly","1"),[0.04,0.12,0.20]],
 ]
 
 source_dir = "../mimicgen/datasets/source"
@@ -34,19 +38,22 @@ def clearOldFiles(task,difficulty,noise_clean):
     old_file = f"{source_dir}/{task}_noise_{noise_clean}.hdf5"
     if os.path.exists(old_file):
         os.remove(old_file)
-        print(f"[✗] Removed old: {old_file}")
+        if debug_mode:
+            print(f"[✗] Removed old: {old_file}")
 
     # Remove old MimicGen output folders
     output_root = f"/tmp/core_datasets/{task}"
     folder = f"{output_root}/{task}_D{difficulty}_noise_{noise_clean}"
     if os.path.isdir(folder):
         shutil.rmtree(folder)
-        print(f"[✗] Removed old output: {folder}")
+        if debug_mode:
+            print(f"[✗] Removed old output: {folder}")
     
     # Step 2: Create new noisy files
     new_path = f"{source_dir}/{task}_noise_{noise_clean}.hdf5"
     shutil.copyfile(original_path, new_path)
-    print(f"[✓] Copied to: {new_path}")
+    if debug_mode:
+        print(f"[✓] Created Blank Noisy File: {new_path}")
     
     return new_path
 
@@ -59,7 +66,8 @@ def addNoise(new_path, noise):
             actions = f[f"data/{key}/actions"][:]
             injected_noise = np.random.normal(scale=noise, size=actions.shape)
             f[f"data/{key}/actions"][:] = actions + injected_noise
-    print(f"[✓] Added noise (scale={noise}) to: {new_path}")
+    if show_progress:
+        print(f"[✓] Added noise (scale={noise}) to: {new_path}")
 
 #############################################################################
 
@@ -76,6 +84,7 @@ def prepareSourceDataset(file_name, environment):
 
     process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     
+    # if show_progress:
     print(f"[✓] Prepared source dataset: {file_name}")
 
 #############################################################################
@@ -105,7 +114,8 @@ def setupConfigs(task,difficulty,noise_clean,source_file):
     with open(out_path, "w") as f:
         json.dump(config, f, indent=4)
 
-    print(f"[✓] Wrote config: {out_path}")
+    if show_progress:
+        print(f"[✓] Wrote config: {out_path}")
     
     return out_path
 
@@ -120,14 +130,18 @@ def generateDataset(config_file, task, difficulty, noise_clean):
     ]
 
     subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    print(f"[✓] Generated dataset: {config_file}")
 
     data_file = f"/tmp/core_datasets/{task}/{task}_D{difficulty}_noise_{noise_clean}/important_stats.json"
-    with open(data_file) as f:
-        stats = json.load(f)
-        return stats.get("num_success","0"), stats.get("num_failures","0")
-    return "0","0"
-    print(f"[✓] Generated dataset: {data_file}")
+    try:
+        with open(data_file) as f:
+            stats = json.load(f)
+            return stats.get("num_success","0"), stats.get("num_failures","0")
+    except FileNotFoundError:
+        print(f"[✗] ERROR: File not found: {data_file}")
+        return "0","0"
+
+    if show_progress:
+        print(f"[✓] Generated dataset: {data_file}")
 
 #############################################################################
 
@@ -142,11 +156,13 @@ def outputResults(task,difficulty,noise,successes,failures):
     # IF THE FILE EXISTS, open the CSV file and read it into a DataFrame
     if os.path.exists(output_file):
         df = pd.read_csv(output_file)
-        print(f"[✓] Found existing CSV file: {output_file}")
+        if debug_mode:
+            print(f"[✓] Found existing CSV file: {output_file}")
     else:
         # Create a new DataFrame with the specified columns
         df = pd.DataFrame(columns=["noise", "success", "fail"])
-        print(f"[✓] Created new CSV file: {output_file}")
+        if debug_mode:
+            print(f"[✓] Created new CSV file: {output_file}")
     # Add a new row to the DataFrame
     new_row = {
         "noise": noise,
@@ -155,12 +171,19 @@ def outputResults(task,difficulty,noise,successes,failures):
     }
 
     # Add the row to the DataFrame, and sort by noise ascending
-    df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+    # If the noise is already in the DataFrame, update the row instead
+    
+    if noise in df["noise"].values:
+        df.loc[df["noise"] == noise, ["success", "fail"]] = [successes, failures]
+    else:
+        df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+
     df = df.sort_values(by=["noise"], ascending=True)
 
     # Save the dataframe to the CSV file (assume df already updated)
     df.to_csv(output_file, index=False)
-    print(f"[✓] Output results to: {output_file}")
+    if show_progress:
+        print(f"[✓] Output results to: {output_file}")
 
 #############################################################################
 
@@ -176,8 +199,8 @@ def executeInstruction(instruction):
     prepareSourceDataset(source_file, environment)
 
     config_file = setupConfigs(task,difficulty,noise_clean,source_file)
-
-    print(f"[...] Generating dataset for {task} with noise level: {noise}")
+    if debug_mode:
+        print(f"[...] Generating dataset for {task} with noise level: {noise}")
     successes,failures = generateDataset(config_file, task, difficulty, noise_clean)
     
     outputResults(task,difficulty,noise,successes,failures)
@@ -198,6 +221,8 @@ def generateInstructionList(instructions):
 instruction_list = generateInstructionList(instructions)
 complete_list = [False]*len(instruction_list)
 current_file = os.path.abspath(sys.argv[0])
+
+print("ROUGH ETA:", round(len(instruction_list) * num_samples / 100 / max_concurrent_samples  * (1/3) + .06,2), "hours")
 
 # Use subprocesses to run five instructions concurrently at a time, eventually getting through all instruction_list
 
@@ -224,6 +249,7 @@ while True:
             p = Process(target=process_task, args=(instruction, i))
             p.start()
             processes.append(p)
+            complete_list[i] = True
             
             if len(processes) >= max_concurrent_samples:
                 break
@@ -231,7 +257,3 @@ while True:
     # Wait for the processes to finish
     for p in processes:
         p.join()
-
-    # Wait for the processes to finish
-    for p in processes:
-        p.wait()
